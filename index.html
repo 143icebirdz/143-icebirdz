@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>143.icebirdz - Voyage Galactique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: #000; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Animations minimalistes */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes cometFly {
+            0% { left: -50px; top: -50px; opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { left: 110vw; top: 110vh; opacity: 0; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(79, 208, 231, 0.3)); }
+            50% { filter: drop-shadow(0 0 15px rgba(79, 208, 231, 0.6)); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .star {
+            animation: twinkle var(--duration) infinite;
+            animation-delay: var(--delay);
+        }
+        
+        .nebula-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 10s ease-in-out infinite;
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .video-bg {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%);
+            z-index: 2;
+        }
+        
+        /* Sections */
+        .scroll-section {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Carousel - Design épuré */
+        .carousel-container {
+            position: relative;
+            width: 92%;
+            max-width: 1100px;
+            height: 82vh;
+            overflow: hidden;
+            border: 1px solid #4FD0E7;
+            box-shadow: 0 0 30px rgba(79, 208, 231, 0.4);
+            background: #000;
+        }
+        
+        .carousel-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            background: #000;
+        }
+        
+        .carousel-image.active {
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 48px;
+            color: #4FD0E7;
+            cursor: pointer;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s, color 0.3s;
+            user-select: none;
+            font-weight: 300;
+        }
+        
+        .carousel-arrow:hover {
+            opacity: 0.8;
+            color: #FAE8ED;
+        }
+        
+        .carousel-arrow-left {
+            left: 25px;
+        }
+        
+        .carousel-arrow-right {
+            right: 25px;
+        }
+        
+        .carousel-container:hover .carousel-arrow {
+            opacity: 0.5;
+        }
+        
+        .carousel-counter {
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            z-index: 20;
+            color: #4FD0E7;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            background: transparent;
+            padding: 8px 16px;
+            border: 1px solid #4FD0E7;
+            border-radius: 0px;
+        }
+        
+        /* Navigation - Minimaliste */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(79, 208, 231, 0.3);
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-logo:hover {
+            opacity: 0.7;
+        }
+        
+        .nav-logo img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid #4FD0E7;
+            object-fit: cover;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+        }
+        
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 300;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: #4FD0E7;
+        }
+        
+        /* Title overlay */
+        .title-overlay {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 50;
+            animation: glow 4s ease-in-out infinite;
+        }
+        
+        .title-overlay h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #4FD0E7, #FAE8ED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        
+        .title-overlay p {
+            color: #4FD0E7;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .mesange-img {
+            border-radius: 50%;
+            border: 1px solid #4FD0E7;
+            box-shadow: 0 0 15px rgba(79, 208, 231, 0.4);
+            object-fit: cover;
+        }
+
+        /* Section About - Minimaliste */
+        .about-container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            max-width: 800px;
+        }
+
+        .about-container h2 {
+            font-size: 2.5rem;
+            color: #4FD0E7;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .about-container p {
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .about-grid {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .about-item {
+            border-left: 1px solid #4FD0E7;
+            padding-left: 30px;
+            text-align: left;
+        }
+
+        .about-item h3 {
+            color: #4FD0E7;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .about-item p {
+            color: #aaa;
+            font-size: 12px;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        /* Section Contact - Minimaliste */
+        .spaceship-svg {
+            width: 300px;
+            height: 200px;
+            margin-bottom: 30px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .contact-container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .contact-container h2 {
+            font-size: 2.2rem;
+            color: #4FD0E7;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .contact-info {
+            color: #fff;
+            font-size: 12px;
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            line-height: 1.8;
+        }
+
+        .contact-tagline {
+            color: #4FD0E7;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-logo" onclick="document.getElementById('accueil').scrollIntoView();">
+            <img src="oiseau.png" alt="Logo" class="mesange-img">
+            <span>143<span style="color: #4FD0E7;">.icebirdz</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="#accueil">ACCUEIL</a>
+            <a href="#portfolio">PORTFOLIO</a>
+            <a href="#apropos">À PROPOS</a>
+            <a href="#contact">CONTACT</a>
+        </div>
+    </nav>
+
+    <!-- Section 1: Galactic Home -->
+    <div id="accueil" class="scroll-section" style="padding-top: 60px;">
+        <!-- Conteneur vidéo YouTube -->
+        <div class="video-container">
+            <!-- Fond galactique -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a3e 0%, #000 100%); z-index: 1;"></div>
+            
+            <!-- Étoiles -->
+            <canvas id="bgCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;"></canvas>
+            
+            <!-- Bouton PLAY centré -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; cursor: pointer;" onclick="openYouTube()" title="Cliquez pour lancer la vidéo">
+                <div style="width: 140px; height: 140px; background: rgba(79, 208, 231, 0.25); border: 3px solid #4FD0E7; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 0 50px rgba(79, 208, 231, 0.7);" onmouseover="this.style.background='rgba(79, 208, 231, 0.5)'; this.style.boxShadow='0 0 80px rgba(79, 208, 231, 1)';" onmouseout="this.style.background='rgba(79, 208, 231, 0.25)'; this.style.boxShadow='0 0 50px rgba(79, 208, 231, 0.7)';">
+                    <span style="color: #4FD0E7; font-size: 60px; margin-left: 10px;">▶</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- YouTube Modal/Overlay -->
+        <div id="youtubeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="position: relative; width: 90%; max-width: 1000px; height: 90vh;">
+                <iframe style="width: 100%; height: 100%; border: none;" src="https://www.youtube.com/embed/bZ8nUzr1JjI?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <!-- Bouton fermer -->
+                <button onclick="closeYouTube()" style="position: absolute; top: -50px; right: 0; background: #4FD0E7; color: #000; border: none; padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 3px; font-weight: bold;">✕ FERMER</button>
+            </div>
+        </div>
+        
+        <div class="video-overlay"></div>
+        
+        <!-- Éléments galactiques subtils -->
+        <div style="position: absolute; top: 15%; right: 10%; z-index: 5;">
+            <div class="nebula-blob" style="width: 250px; height: 250px; background: radial-gradient(circle, rgba(250, 232, 237, 0.15), transparent);"></div>
+        </div>
+        
+        <div style="position: absolute; bottom: 15%; left: 10%; z-index: 5;">
+            <div class="nebula-blob" style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(79, 208, 231, 0.15), transparent); animation-delay: 2s;"></div>
+        </div>
+        
+        <!-- Titre -->
+        <div class="title-overlay">
+            <h1>143.icebirdz</h1>
+            <p>slimoney flyy💸</p>
+        </div>
+        
+        <!-- Canvas pour les comètes -->
+        <canvas id="cometCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;"></canvas>
+    </div>
+
+    <!-- Section 2: Portfolio -->
+    <div id="portfolio" class="scroll-section" style="background: linear-gradient(135deg, #000 0%, #0a0015 50%, #000 100%); padding-top: 60px;">
+        <div class="carousel-container">
+            <!-- 5 vraies images (sans la mésange) -->
+            <img src="image1.jpg" alt="Project 1" class="carousel-image active">
+            <img src="image2.jpg" alt="Project 2" class="carousel-image">
+            <img src="image3.jpg" alt="Project 3" class="carousel-image">
+            <img src="image4.png" alt="Project 4" class="carousel-image">
+            <img src="image5.png" alt="Project 5" class="carousel-image">
+            
+            <div class="carousel-arrow carousel-arrow-left" onclick="changeSlide(-1)">‹</div>
+            <div class="carousel-arrow carousel-arrow-right" onclick="changeSlide(1)">›</div>
+            <div class="carousel-counter"><span id="slideCounter">01</span> / 05</div>
+        </div>
+    </div>
+
+    <!-- Section 3: About -->
+    <div id="apropos" class="scroll-section" style="background: linear-gradient(135deg, #0a0015 0%, #000 50%, #0a001a 100%); padding-top: 60px;">
+        <div class="about-container">
+            <img src="oiseau.png" 
+                  alt="Mésange" 
+                  style="width: 160px; height: 160px; border-radius: 50%; border: 1px solid #4FD0E7; margin-bottom: 30px; box-shadow: 0 0 15px rgba(79, 208, 231, 0.4); object-fit: cover;">
+            
+            <h2>143.icebirdz</h2>
+            <p>
+                Artiste visuel & créateur d'univers musicaux<br/>
+                Spécialiste en identité visuelle R&B & musicale
+            </p>
+            
+            <div class="about-grid">
+                <div class="about-item">
+                    <h3>🎵 Spécialité</h3>
+                    <p>Pochettes d'album<br/>Identité visuelle musicale</p>
+                </div>
+                <div class="about-item">
+                    <h3>🚀 Approche</h3>
+                    <p>Artistique<br/>Expérimentale & Galactique</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Éléments galactiques subtils -->
+        <div style="position: absolute; top: 10%; left: 5%; z-index: 1;">
+            <div class="nebula-blob" style="width: 150px; height: 150px; background: radial-gradient(circle, rgba(79, 208, 231, 0.1), transparent);"></div>
+        </div>
+        <div style="position: absolute; bottom: 10%; right: 5%; z-index: 1;">
+            <div class="nebula-blob" style="width: 200px; height: 200px; background: radial-gradient(circle, rgba(250, 232, 237, 0.08), transparent);"></div>
+        </div>
+    </div>
+
+    <!-- Section 4: Contact -->
+    <div id="contact" class="scroll-section" style="background: linear-gradient(135deg, #000 0%, #1a0033 50%, #000 100%); padding-top: 60px;">
+        <div class="contact-container">
+            <!-- Nouvelle soucoupe futuriste -->
+            <img src="soucoupe.png" 
+                 alt="Spaceship" 
+                 style="width: 280px; height: auto; margin-bottom: 30px; filter: drop-shadow(0 0 25px rgba(79, 208, 231, 0.4)); animation: float 4s ease-in-out infinite; object-fit: contain;">
+            
+            <h2>Contactez-moi</h2>
+            
+            <div class="contact-info">
+                📧 plugrx31@gmail.com<br/>
+                📷 @143.icebirdz
+            </div>
+            
+            <p class="contact-tagline">Prêt à décoller ?</p>
+        </div>
+        
+        <!-- Éléments galactiques subtils -->
+        <div style="position: absolute; top: 5%; right: 5%; z-index: 1;">
+            <div class="nebula-blob" style="width: 250px; height: 250px; background: radial-gradient(circle, rgba(79, 208, 231, 0.12), transparent);"></div>
+        </div>
+        <div style="position: absolute; bottom: 10%; left: 5%; z-index: 1;">
+            <div class="nebula-blob" style="width: 230px; height: 230px; background: radial-gradient(circle, rgba(250, 232, 237, 0.08), transparent);"></div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas pour les étoiles
+        const bgCanvas = document.getElementById('bgCanvas');
+        if (bgCanvas) {
+            const ctx = bgCanvas.getContext('2d');
+            
+            function resizeCanvas() {
+                bgCanvas.width = window.innerWidth;
+                bgCanvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Étoiles
+            const stars = Array.from({ length: 400 }).map(() => ({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                size: Math.random() * 1.2 + 0.2,
+                opacity: Math.random() * 0.5 + 0.1
+            }));
+            
+            function drawStars() {
+                stars.forEach(star => {
+                    const flicker = Math.sin(Date.now() / 600 + star.x) * 0.25;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, star.opacity + flicker)})`;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+            
+            function animateBg() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+                ctx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+                drawStars();
+                requestAnimationFrame(animateBg);
+            }
+            
+            animateBg();
+        }
+        
+        // Fonctions YouTube Modal
+        function openYouTube() {
+            document.getElementById('youtubeModal').style.display = 'flex';
+        }
+        
+        function closeYouTube() {
+            document.getElementById('youtubeModal').style.display = 'none';
+        }
+        
+        // Fermer au clic en dehors
+        document.getElementById('youtubeModal').onclick = function(event) {
+            if (event.target === this) {
+                closeYouTube();
+            }
+        }
+        
+        // Fermer avec ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeYouTube();
+            }
+        });
+        
+        // Carousel (reste du code)
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-image');
+        
+        function changeSlide(direction) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + direction + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('slideCounter').textContent = String(currentSlide + 1).padStart(2, '0');
+        }
+        
+        // Clavier navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+        
+        // Canvas pour les comètes
+        const canvas = document.getElementById('cometCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Étoiles
+        const stars = Array.from({ length: 300 }).map(() => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.2 + 0.2,
+            opacity: Math.random() * 0.5 + 0.1
+        }));
+        
+        function drawStars() {
+            stars.forEach(star => {
+                const flicker = Math.sin(Date.now() / 600 + star.x) * 0.25;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, star.opacity + flicker)})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        // Comètes
+        function drawComets() {
+            const cometCount = 5;
+            for (let i = 0; i < cometCount; i++) {
+                const time = (Date.now() + i * 2500) / 6000;
+                const t = (time % 1);
+                const x = -100 + t * (canvas.width + 200);
+                const y = -100 + t * (canvas.height + 200);
+                
+                ctx.strokeStyle = `rgba(79, 208, 231, ${Math.max(0, 0.6 - t * 1.2)})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - 50, y - 50);
+                ctx.stroke();
+            }
+        }
+        
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawStars();
+            drawComets();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
